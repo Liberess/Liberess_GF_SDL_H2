@@ -35,8 +35,8 @@ private:
   SDL_Window* m_pWindow;
   SDL_Renderer* m_pRenderer;
   bool m_bRunning;
-  std::map<std::string, GameObject*> m_gameObjects;
-  //std::vector<GameObject*> m_gameObjects;
+  //std::map<std::string, GameObject*> m_gameObjects;
+  std::vector<GameObject*> m_gameObjects;
   int m_screenWidth;
   int m_screenHeight;
 };

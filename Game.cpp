@@ -40,13 +40,13 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
     return false;
   }
 
-  m_gameObjects["ground1"] = new Ground(new LoaderParams(0, 430, 640, 50, "ground1"));
+  /* m_gameObjects["ground1"] = new Ground(new LoaderParams(0, 430, 640, 50, "ground1"));
   m_gameObjects["player"] = new Player(new LoaderParams(100, 100, 128, 82, "player"));
-  m_gameObjects["enemy"] = new Enemy(new LoaderParams(300, 300, 128, 82, "enemy"));
+  m_gameObjects["enemy"] = new Enemy(new LoaderParams(300, 300, 128, 82, "enemy")); */
 
-  /* m_gameObjects.push_back(new Ground(new LoaderParams(0, 430, 640, 50, "ground1")));
+  m_gameObjects.push_back(new Ground(new LoaderParams(0, 430, 640, 50, "ground1")));
   m_gameObjects.push_back(new Player(new LoaderParams(100, 100, 128, 82, "animate")));
-  m_gameObjects.push_back(new Enemy(new LoaderParams(300, 300, 128, 82, "animate"))); */
+  m_gameObjects.push_back(new Enemy(new LoaderParams(300, 300, 128, 82, "animate")));
 
   m_bRunning = true;
   return true;
