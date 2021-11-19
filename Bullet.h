@@ -2,12 +2,13 @@
 
 #include "SDLGameObject.h"
 
-class Enemy : public SDLGameObject
+class Bullet : public SDLGameObject
 {
 public:
-  Enemy(const LoaderParams* pParams);
+  Bullet(const LoaderParams* pParams);
   virtual void draw();
   virtual void update();
   virtual void clean();
   virtual void destroy();
+  void checkCollision();
 };

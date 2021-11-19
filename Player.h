@@ -9,7 +9,6 @@ public:
   virtual void update();
   virtual void clean();
   void checkCollision();
-  virtual void velocityZero() {}
   void move();
   void jump();
   void shoot();
