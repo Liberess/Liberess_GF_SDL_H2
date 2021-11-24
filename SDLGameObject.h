@@ -22,16 +22,17 @@ class SDLGameObject : public GameObject
 {
 public:
   SDLGameObject(const LoaderParams* pParams);
+  virtual ~SDLGameObject() {}
   virtual void draw();
   virtual void update();
   virtual void clean();
+  virtual void hit() {}
   virtual void destroy() {}
   int getX() const { return m_position.getX(); }
   int getY() const { return m_position.getY(); }
   int getWidth() const { return m_width; }
   int getHeight() const { return m_height; }
   bool checkCollision(const SDL_Rect& target, int type = 0);
-  virtual ~SDLGameObject() {}
   SDL_Rect getDestRect() { return m_destRect; }
 
 protected:

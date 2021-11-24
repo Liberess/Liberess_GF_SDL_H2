@@ -33,7 +33,7 @@ void InputHandler::Update()
 void InputHandler::OnMouseMove(SDL_Event event)
 {
   m_mousePos->setX(event.motion.x);
-  m_mousePos->setX(event.motion.y);
+  m_mousePos->setY(event.motion.y);
 }
 
 void InputHandler::OnMouseBtnDown(SDL_Event event)

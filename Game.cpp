@@ -1,9 +1,9 @@
 #include "Game.h"
+#include "TextManager.h"
 #include "TextureManager.h"
 #include "Ground.h"
 #include "Player.h"
 #include "Enemy.h"
-#include "Bullet.h"
 #include "Background.h"
 #include "Vector2D.h"
 
@@ -17,15 +17,9 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 
     if (m_pWindow != 0)
     {
-      m_levelWidth = 1280;
-      m_levelHeight = 720;
-      
       m_screenWidth = width;
       m_screenHeight = height;
 
-      std::cout << "rect x : " << m_cameraRect.x << std::endl;
-  std::cout << "rect y : " << m_cameraRect.y << std::endl;      
-      
       m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, 0);
 
       if (m_pRenderer != 0)
@@ -39,47 +33,77 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
     return false;
   }
 
-  if (!TheTextureManager::Instance()->load("Assets/background.png", "background", m_pRenderer))
+  try
   {
-    return false;
+    parseSprite("Assets/background.png", "background");
+    m_gameObjects["background"] = new Background(new LoaderParams(0, 0, 640, 480, "background"));
+
+    parseSprite("Assets/ground1.png", "ground1");
+    m_gameObjects["ground1"] = new Ground(new LoaderParams(0, 430, 640, 50, "ground1"));
+
+    parseSprite("Assets/wall.png", "wall");
+    m_gameObjects["wall"] = new Ground(new LoaderParams(500, 330, 50, 150, "wall"));
+
+    parseSprite("Assets/Ninja_Frog-export.png", "ninja_frog");
+    m_gameObjects["player"] = new Player(new LoaderParams(0, 300, 64, 64, "ninja_frog"));
+
+    parseSprite("Assets/Radish-export.png", "enemy");
+    m_gameObjects["enemy"] = new Enemy(new LoaderParams(300, 300, 60, 76, "enemy"));
+
+    parseSprite("Assets/bullet.png", "bullet");
+
+    updateCamera();
+  }
+  catch(std::string expt)
+  {
+    std::cout << expt << std::endl;
   }
 
-  if (!TheTextureManager::Instance()->load("Assets/animate.png", "animate", m_pRenderer))
-  {
-    return false;
-  }
+  m_bulletID = 0;
 
-  if (!TheTextureManager::Instance()->load("Assets/ground1.png", "ground1", m_pRenderer))
-  {
-    return false;
-  }
-
-  if (!TheTextureManager::Instance()->load("Assets/ground2.png", "ground2", m_pRenderer))
-  {
-    return false;
-  }
-
-  if (!TheTextureManager::Instance()->load("Assets/wall.png", "wall", m_pRenderer))
-  {
-    return false;
-  }
-
-  if (!TheTextureManager::Instance()->load("Assets/bullet.png", "bullet", m_pRenderer))
-  {
-    return false;
-  }
-
-  m_gameObjects["background"] = new Background(new LoaderParams(0, 0, 640, 480, "background"));
-  m_gameObjects["ground1"] = new Ground(new LoaderParams(0, 430, 640, 50, "ground1"));
-  m_gameObjects["ground2"] = new Ground(new LoaderParams(300, 300, 150, 50, "ground2"));
-  m_gameObjects["wall"] = new Ground(new LoaderParams(500, 330, 50, 150, "wall"));
-  m_gameObjects["player"] = new Player(new LoaderParams(0, 0, 128, 82, "animate"));
-  m_gameObjects["enemy"] = new Enemy(new LoaderParams(300, 100, 128, 82, "animate"));
-  
   m_bRunning = true;
   return true;
 }
 
+void Game::destroyGameObject(std::string key)
+{
+  std::map<std::string, SDLGameObject*>::iterator it;
+
+  it = m_gameObjects.find(key);
+
+  if(it != m_gameObjects.end())
+  {
+    delete it->second;
+    m_gameObjects.erase(key);
+  }
+}
+
+void Game::destroyBullet(int id)
+{
+  std::cout << id << "를 Game이 삭제" << std::endl;
+  std::cout << "destroyBullet : " << id << std::endl;
+  m_bulletArray[id] = 0;
+  --m_bulletID;
+}
+
+void Game::parseSprite(std::string path, std::string id)
+{
+  if(!TheTextureManager::Instance()->load(path, id, m_pRenderer))
+    throw path + "는 유효하지 않은 경로입니다.";
+}
+
+void Game::instantiateBullet(const SDL_Rect& rect, const Vector2D& dirc)
+{
+  std::cout << m_bulletID << "를 Game이 생성" << std::endl;
+  m_bulletArray[m_bulletID] = new Bullet(new LoaderParams(rect.x + (rect.w / 2) - 16, rect.y + (rect.h / 2) - 16, 32, 32, "bullet"), dirc);
+  m_bulletArray[m_bulletID]->setID(m_bulletID);
+
+  ++m_bulletID;
+  
+  /* m_bullets.push_back(new Bullet(new LoaderParams(rect.x + (rect.w / 2) - 16, rect.y + (rect.h / 2) - 16, 32, 32, "bullet"), dirc)); */
+}
+
+// Render Update
 void Game::render()
 {
   SDL_RenderClear(m_pRenderer);
@@ -87,14 +111,42 @@ void Game::render()
   for(auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
     it->second->draw();
 
+  // for(int i = 0; i < m_bullets.size(); i++)
+  //   m_bullets[i]->draw();
+
+  int size = sizeof(m_bulletArray) / sizeof(Bullet*);
+
+  for(int i = 0; i < size; i++)
+  {
+    if(m_bulletArray[i] != 0)
+      m_bulletArray[i]->draw();
+  }
+
+  TheTextManager::Instance()->drawText("GameFrameWork HW2", 50, 50, m_pRenderer);
+
   SDL_RenderPresent(m_pRenderer);
 }
 
+// Fixed Update
 void Game::update()
 {
   for(auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
-    it->second->update();
+  {
+    if(it->second != 0)
+      it->second->update();
+  }
 
+  // for(int i = 0; i < m_bullets.size(); ++i)
+  //   m_bullets[i]->update();
+
+  int size = sizeof(m_bulletArray) / sizeof(Bullet*);
+
+  for(int i = 0; i < size; i++)
+  {
+    if(m_bulletArray[i] != 0)
+      m_bulletArray[i]->update();
+  }
+    
   updateCamera();
 }
 
@@ -107,27 +159,15 @@ void Game::updateCamera()
 
   if( m_cameraRect.x < 0 )
 		m_cameraRect.x = 0;
+
 	if( m_cameraRect.y < 0 )
 		m_cameraRect.y = 0;
-	if( m_cameraRect.x > m_levelWidth - m_cameraRect.w )
-    m_cameraRect.x = m_levelWidth - m_cameraRect.w;
-	if( m_cameraRect.y > m_levelHeight - m_cameraRect.h )
-		m_cameraRect.y = m_levelHeight - m_cameraRect.h;
-}
 
-bool Game::running()
-{
-  return m_bRunning;
-}
-
-void Game::handleEvents()
-{
-  TheInputHandler::Instance()->Update();
-}
-
-void Game::instantiateBullet(Vector2D pos)
-{
-  m_bullets.push_back(new Bullet(new LoaderParams(pos.getX(), pos.getY(), 32, 32, "bullet")));
+	if( m_cameraRect.x > (LEVEL_WIDTH - m_cameraRect.w) )
+    m_cameraRect.x = LEVEL_WIDTH - m_cameraRect.w;
+    
+	if( m_cameraRect.y > (LEVEL_HEIGHT - m_cameraRect.h) )
+		m_cameraRect.y = LEVEL_HEIGHT - m_cameraRect.h;
 }
 
 void Game::clean()

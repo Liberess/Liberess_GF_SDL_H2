@@ -24,21 +24,18 @@ Player::Player(const LoaderParams* pParams) : SDLGameObject(pParams)
 
 void Player::draw()
 {
-  //TheTextureManager::Instance()->drawFrame(m_textureID, m_position.getX() - TheGame::Instance()->getCameraRect().x, m_position.getY() - TheGame::Instance()->getCameraRect().y, m_width, m_height, m_currentRow, m_currentFrame, m_destRect, TheGame::Instance()->getRenderer(), m_flipX);
   SDLGameObject::draw();
 }
 
 void Player::update()
 {
   checkCollision();
+
   move();
   jump();
   shoot();
 
-  if(m_velocity.getX() != 0 || m_velocity.getY() != 0)
-    m_currentFrame = (SDL_GetTicks() / 100) % 6;
-  else
-    m_currentFrame = 0;
+  m_currentFrame = (SDL_GetTicks() / 100) % 11;
 
   SDLGameObject::update();
 }
@@ -56,6 +53,8 @@ void Player::move()
     {
       m_velocity.setX(0);
     }
+
+    m_currentRow = 1; //Run
   }
   else if(TheInputHandler::Instance()->IsKeyDown(SDL_SCANCODE_LEFT))
   {
@@ -68,9 +67,12 @@ void Player::move()
     {
       m_velocity.setX(0);
     }
+
+    m_currentRow = 1; //Run
   }
   else
   {
+    m_currentRow = 0; //Idle
     m_velocity.setX(0);
   }
 }
@@ -118,10 +120,16 @@ void Player::shoot()
 {
   if(m_shotTime >= 2.0f)
   {
-    if(TheInputHandler::Instance()->GetMouseBtnState(TheInputHandler::LEFT))
+    if(TheInputHandler::Instance()->IsKeyDown(SDL_SCANCODE_SPACE))
     {
-      std::cout << "총알 발사" << std::endl;
-      TheGame::Instance()->instantiateBullet(m_position);
+      std::cout << "Shoot" << std::endl;
+      Vector2D dirc(0, 0);
+
+      dirc.setY(0);
+
+      m_flipX == SDL_FLIP_HORIZONTAL ? dirc.setX(-1) : dirc.setX(1);
+      TheGame::Instance()->instantiateBullet(m_destRect, dirc);
+
       m_shotTime = 0.0f;
     }
   }
@@ -133,14 +141,6 @@ void Player::shoot()
 
 void Player::checkCollision()
 {
-  if(TheGame::Instance()->m_gameObjects["enemy"] != 0)
-  {
-    if(SDLGameObject::checkCollision(TheGame::Instance()->m_gameObjects["enemy"]->getDestRect()))
-    {
-      std::cout << "enemy랑 닿음" << std::endl;
-    }
-  }
-
   if(TheGame::Instance()->m_gameObjects["ground1"] != 0)
   {
     if(SDLGameObject::checkCollision(TheGame::Instance()->m_gameObjects["ground1"]->getDestRect()))

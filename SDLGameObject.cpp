@@ -40,7 +40,19 @@ void SDLGameObject::draw()
           m_flipX
         ); */
 
-        TheTextureManager::Instance()->drawFrame(m_textureID, m_position.getX() - TheGame::Instance()->getCameraRect().x, m_position.getY() - TheGame::Instance()->getCameraRect().y, m_width, m_height, m_currentRow, m_currentFrame, m_destRect, TheGame::Instance()->getRenderer(), m_flipX);
+  TheTextureManager::Instance()
+    ->drawFrame
+        (
+          m_textureID,
+          m_position.getX() - TheGame::Instance()->getCameraRect().x,
+          //m_position.getY() - TheGame::Instance()->getCameraRect().y,
+          m_position.getY(),
+          m_width, m_height,
+          m_currentRow, m_currentFrame,
+          m_destRect,
+          TheGame::Instance()->getRenderer(),
+          m_flipX
+        );
 }
 
 void SDLGameObject::update()

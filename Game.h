@@ -4,9 +4,12 @@
 
 #include "SDL.h"
 //#include "GameObject.h"
+#include "Bullet.h"
+#include "Vector2D.h"
 #include "SDLGameObject.h"
 #include <map>
 #include <vector>
+#include <iostream>
 
 class Game
 {
@@ -19,18 +22,21 @@ public:
   }
   ~Game() {}
   bool init(const char* title, int xpos, int ypos, int height, int width, int flags);
+  void parseSprite(std::string path, std::string id);
   void render();
   void update();
-  bool running();
-  void handleEvents();
+  bool running() const { return m_bRunning; };
+  void handleEvents() { TheInputHandler::Instance()->Update(); };
   void clean();
   void quit() { m_bRunning = false; }
   SDL_Renderer* getRenderer() const { return m_pRenderer; }
   int getScreenWidth() const { return m_screenWidth; }
   int getScreenHeight() const { return m_screenHeight; }
-  void instantiateBullet(Vector2D pos);
+  void instantiateBullet(const SDL_Rect& rect, const Vector2D& dirc);
   SDL_Rect getCameraRect() const { return m_cameraRect; }
   void updateCamera();
+  void destroyBullet(int id);
+  void destroyGameObject(std::string key);
 
 private:
   Game() {}
@@ -38,13 +44,14 @@ private:
   SDL_Window* m_pWindow;
   SDL_Renderer* m_pRenderer;
   bool m_bRunning;
-  std::vector<GameObject*> m_bullets;
+  std::vector<Bullet*> m_bullets;
   //std::vector<GameObject*> m_gameObjects;
-  int m_levelWidth;
-  int m_levelHeight;
-  int m_screenWidth;
-  int m_screenHeight;
+  const static int LEVEL_WIDTH = 640;
+  const static int LEVEL_HEIGHT = 480;
+  int m_screenWidth, m_screenHeight;
   SDL_Rect m_cameraRect;
+  int m_bulletID;
+  const static int MAX_BULLET = 3;
 };
 
 typedef Game TheGame;
