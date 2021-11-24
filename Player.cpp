@@ -44,7 +44,7 @@ void Player::move()
 {
   if(TheInputHandler::Instance()->IsKeyDown(SDL_SCANCODE_RIGHT))
   {
-    if(m_position.getX() + m_width < TheGame::Instance()->getScreenWidth() && !m_rightObstacle)
+    if(m_position.getX() + m_width < TheGame::Instance()->getScreenWidth())
     {
       m_velocity.setX(m_moveSpeed);
       m_flipX = SDL_FLIP_NONE;
@@ -58,7 +58,7 @@ void Player::move()
   }
   else if(TheInputHandler::Instance()->IsKeyDown(SDL_SCANCODE_LEFT))
   {
-    if(m_position.getX() > 0 && m_leftObstacle)
+    if(m_position.getX() > 0)
     {
       m_velocity.setX(m_moveSpeed * -1);
       m_flipX = SDL_FLIP_HORIZONTAL;
@@ -122,7 +122,6 @@ void Player::shoot()
   {
     if(TheInputHandler::Instance()->IsKeyDown(SDL_SCANCODE_SPACE))
     {
-      std::cout << "Shoot" << std::endl;
       Vector2D dirc(0, 0);
 
       dirc.setY(0);

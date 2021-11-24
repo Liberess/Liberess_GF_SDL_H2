@@ -52,9 +52,5 @@ protected:
   bool m_isJumping;
   bool m_isGround;
   bool m_isObstacle;
-  bool m_leftObstacle;
-  bool m_rightObstacle;
-  bool m_upObstacle;
-  bool m_downObstacle;
   SDL_Rect m_destRect;
 };

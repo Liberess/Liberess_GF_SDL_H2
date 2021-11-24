@@ -3,12 +3,11 @@
 #define __Game__
 
 #include "SDL.h"
-//#include "GameObject.h"
 #include "Bullet.h"
 #include "Vector2D.h"
 #include "SDLGameObject.h"
 #include <map>
-#include <vector>
+#include <string>
 #include <iostream>
 
 class Game
@@ -35,7 +34,6 @@ public:
   void instantiateBullet(const SDL_Rect& rect, const Vector2D& dirc);
   SDL_Rect getCameraRect() const { return m_cameraRect; }
   void updateCamera();
-  void destroyBullet(int id);
   void destroyGameObject(std::string key);
 
 private:
@@ -44,13 +42,12 @@ private:
   SDL_Window* m_pWindow;
   SDL_Renderer* m_pRenderer;
   bool m_bRunning;
-  std::vector<Bullet*> m_bullets;
-  //std::vector<GameObject*> m_gameObjects;
   const static int LEVEL_WIDTH = 640;
   const static int LEVEL_HEIGHT = 480;
   int m_screenWidth, m_screenHeight;
   SDL_Rect m_cameraRect;
   int m_bulletID;
+  int m_bulletCount;
   const static int MAX_BULLET = 3;
 };
 

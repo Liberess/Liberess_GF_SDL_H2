@@ -1,3 +1,5 @@
+// https://drive.google.com/file/d/14htScF7ZwSjaydlXQrRFBM6AEcLCs3RR/view?usp=sharing
+
 #include "Game.h"
 #include <iostream>
 
@@ -15,7 +17,9 @@ int main(int argc, char* args[])
       frameStart = SDL_GetTicks();
 
       TheGame::Instance()->handleEvents();
+      //std::cout << "handleEvents -> update" << std::endl;
       TheGame::Instance()->update();
+      //std::cout << "update -> render" << std::endl;
       TheGame::Instance()->render();
 
       frameTime = SDL_GetTicks() - frameStart;

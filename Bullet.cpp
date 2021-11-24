@@ -1,8 +1,8 @@
 #include "Bullet.h"
 #include "Game.h"
 
-Bullet::Bullet(const LoaderParams* pParams, const Vector2D& dirc)
-  : SDLGameObject(pParams), m_direction(dirc)
+Bullet::Bullet(const LoaderParams* pParams, const Vector2D& dirc, std::string id)
+  : SDLGameObject(pParams), m_direction(dirc), m_id(id)
 {
   m_currentRow = m_currentFrame = 0;
 
@@ -22,22 +22,19 @@ void Bullet::update()
   if(IsOutSideScreen())
     destroy();
 
-  SDLGameObject::update();
+  if(m_isInteract)
+    checkCollision();
 
-  checkCollision();
+  SDLGameObject::update();
 }
 
 void Bullet::checkCollision()
 {
-  if(!m_isInteract)
-    return;
-
   if(TheGame::Instance()->m_gameObjects["enemy"] != 0)
   {
     if(SDLGameObject::checkCollision(TheGame::Instance()->m_gameObjects["enemy"]->getDestRect()))
     {
-      m_isInteract = false;
-      TheGame::Instance()->m_gameObjects["enemy"]->destroy();
+      TheGame::Instance()->m_gameObjects["enemy"]->destroy(); //->Enemy Hit Anim
       destroy();
     }
   }
@@ -53,7 +50,7 @@ void Bullet::checkCollision()
 
 bool Bullet::IsOutSideScreen()
 {
-  if(m_position.getX() < 0 || m_position.getY() < 0 || m_position.getX() > TheGame::Instance()->getScreenWidth() || m_position.getY() > TheGame::Instance()->getScreenHeight()) 
+  if(m_position.getX() < 0 || m_position.getY() < 0 || m_position.getX() > TheGame::Instance()->getScreenWidth() || m_position.getY() > TheGame::Instance()->getScreenHeight())
     return true;
   
   return false;
@@ -66,7 +63,7 @@ void Bullet::clean()
 
 void Bullet::destroy()
 {
-  std::cout << m_id << "번째 총알 파괴 신호" << std::endl;
-  TheGame::Instance()->destroyBullet(m_id);
-  //TheGame::Instance()->m_gameObjects.erase("bullet");
+  m_isInteract = false;
+  TheGame::Instance()->destroyGameObject(m_id);
+  //TheGame::Instance()->destroyGameObject("enemy"); //->Enemy Die
 }

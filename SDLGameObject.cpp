@@ -79,44 +79,16 @@ bool SDLGameObject::checkCollision(const SDL_Rect& target, int type)
   bottomB = target.y + target.h;
 
   if(bottomA < topB) // 아래 충돌?
-  {
-    m_downObstacle = false;
     return false;
-  }
-  else
-  {
-    m_downObstacle = true;
-  }
     
   if(topA > bottomB) // 위 충돌?
-  {
-    m_upObstacle = false;
     return false;
-  }
-  else
-  {
-    m_upObstacle = true;
-  }
 
   if(rightA < leftB) // 오른쪽 충돌?
-  {
-    m_rightObstacle = false;
     return false;
-  }
-  else
-  {
-    m_rightObstacle = true;
-  }
 
   if(leftA > rightB) // 왼쪽 충돌?
-  {
-    m_leftObstacle = false;
     return false;
-  }
-  else
-  {
-    m_leftObstacle = true;
-  }
 
   return true;
 }

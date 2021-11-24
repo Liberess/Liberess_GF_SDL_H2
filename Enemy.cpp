@@ -4,7 +4,7 @@
 
 Enemy::Enemy(const LoaderParams* pParams) : SDLGameObject(pParams)
 {
-  m_isHit = true;
+  m_isHit = false;
 }
 
 void Enemy::draw()
@@ -14,17 +14,21 @@ void Enemy::draw()
 
 void Enemy::update()
 {
-  // hit();
+  hit();
+
+  move();
   
   checkCollision();
   
-  static float currentVelocityY = 0;
-
-  currentVelocityY += 0.02f * 9.8f;
-
   SDLGameObject::update();
   
   m_currentFrame = (SDL_GetTicks() / 100) % 5;
+}
+
+void Enemy::move()
+{
+  static float currentVelocityY = 0;
+  currentVelocityY += 0.02f * 9.8f;
 
   // If Grounded
   if(m_isGround)
@@ -60,26 +64,26 @@ void Enemy::hit()
     return;
 
   if(m_timer.done())
-    destroy();
+    m_currentRow = 0;
+}
+
+void Enemy::destroy()
+{
+  m_currentRow = 1;
+
+  if(!m_isHit)
+  {
+    m_isHit = true;
+    m_timer.setInterval(1000);
+    m_timer.start();
+    m_currentRow = 1;
+    return;
+  }
+
+  //TheGame::Instance()->destroyGameObject("enemy");
 }
 
 void Enemy::clean()
 {
    
-}
-
-void Enemy::destroy()
-{
-  if(!m_isHit)
-  {
-    m_isHit = true;
-    // m_timer.setInterval(1500);
-    // m_timer.start();
-    m_currentRow = 1;
-    
-    return;
-  }
-
-  TheGame::Instance()->destroyGameObject("enemy");
-  //TheTextureManager::Instance()->destroyTexture(m_textureID);
 }

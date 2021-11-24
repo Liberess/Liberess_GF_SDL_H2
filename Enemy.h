@@ -10,6 +10,7 @@ public:
   virtual void draw();
   virtual void update();
   void checkCollision();
+  void move();
   virtual void hit();
   virtual void clean();
   virtual void destroy();

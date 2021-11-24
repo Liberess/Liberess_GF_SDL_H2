@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "Background.h"
 #include "Vector2D.h"
+#include <typeinfo>
 
 Game* Game::s_pInstance = 0;
 
@@ -35,6 +36,8 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 
   try
   {
+    m_gameObjects.clear();
+
     parseSprite("Assets/background.png", "background");
     m_gameObjects["background"] = new Background(new LoaderParams(0, 0, 640, 480, "background"));
 
@@ -49,7 +52,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 
     parseSprite("Assets/Radish-export.png", "enemy");
     m_gameObjects["enemy"] = new Enemy(new LoaderParams(300, 300, 60, 76, "enemy"));
-
+    
     parseSprite("Assets/bullet.png", "bullet");
 
     updateCamera();
@@ -60,6 +63,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
   }
 
   m_bulletID = 0;
+  m_bulletCount = 0;
 
   m_bRunning = true;
   return true;
@@ -67,23 +71,18 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, in
 
 void Game::destroyGameObject(std::string key)
 {
-  std::map<std::string, SDLGameObject*>::iterator it;
-
-  it = m_gameObjects.find(key);
+  auto it = m_gameObjects.find(key);
 
   if(it != m_gameObjects.end())
   {
+    // 만약 Bullet Object라면, Bullet Count를 감소시킨다.
+    // 최대로 생성될 수 있는 총알이 제한되어 있기 때문이다.
+    if(key.find("bullet", 0, 5) != std::string::npos)
+      --m_bulletCount;
+
     delete it->second;
     m_gameObjects.erase(key);
   }
-}
-
-void Game::destroyBullet(int id)
-{
-  std::cout << id << "를 Game이 삭제" << std::endl;
-  std::cout << "destroyBullet : " << id << std::endl;
-  m_bulletArray[id] = 0;
-  --m_bulletID;
 }
 
 void Game::parseSprite(std::string path, std::string id)
@@ -94,13 +93,26 @@ void Game::parseSprite(std::string path, std::string id)
 
 void Game::instantiateBullet(const SDL_Rect& rect, const Vector2D& dirc)
 {
-  std::cout << m_bulletID << "를 Game이 생성" << std::endl;
-  m_bulletArray[m_bulletID] = new Bullet(new LoaderParams(rect.x + (rect.w / 2) - 16, rect.y + (rect.h / 2) - 16, 32, 32, "bullet"), dirc);
-  m_bulletArray[m_bulletID]->setID(m_bulletID);
-
-  ++m_bulletID;
+  if(m_bulletCount > 2)
+    return;
   
-  /* m_bullets.push_back(new Bullet(new LoaderParams(rect.x + (rect.w / 2) - 16, rect.y + (rect.h / 2) - 16, 32, 32, "bullet"), dirc)); */
+  std::string key = "bullet" + std::to_string(m_bulletID);
+  m_gameObjects[key] = new Bullet(new LoaderParams(rect.x + (rect.w / 2) - 8, rect.y + (rect.h / 2) - 8, 16, 16, "bullet"), dirc, key);
+  
+  ++m_bulletID;
+  ++m_bulletCount;
+}
+
+// Fixed Update
+void Game::update()
+{
+  for(auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
+  {
+    if(it->second != 0) //이 예외처리가 필요함! 이것이 원인!
+      it->second->update();
+  }
+
+  updateCamera();
 }
 
 // Render Update
@@ -109,45 +121,14 @@ void Game::render()
   SDL_RenderClear(m_pRenderer);
 
   for(auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
-    it->second->draw();
-
-  // for(int i = 0; i < m_bullets.size(); i++)
-  //   m_bullets[i]->draw();
-
-  int size = sizeof(m_bulletArray) / sizeof(Bullet*);
-
-  for(int i = 0; i < size; i++)
   {
-    if(m_bulletArray[i] != 0)
-      m_bulletArray[i]->draw();
+    if(it->second != 0)
+      it->second->draw();
   }
-
+   
   TheTextManager::Instance()->drawText("GameFrameWork HW2", 50, 50, m_pRenderer);
 
   SDL_RenderPresent(m_pRenderer);
-}
-
-// Fixed Update
-void Game::update()
-{
-  for(auto it = m_gameObjects.begin(); it != m_gameObjects.end(); it++)
-  {
-    if(it->second != 0)
-      it->second->update();
-  }
-
-  // for(int i = 0; i < m_bullets.size(); ++i)
-  //   m_bullets[i]->update();
-
-  int size = sizeof(m_bulletArray) / sizeof(Bullet*);
-
-  for(int i = 0; i < size; i++)
-  {
-    if(m_bulletArray[i] != 0)
-      m_bulletArray[i]->update();
-  }
-    
-  updateCamera();
 }
 
 void Game::updateCamera()
